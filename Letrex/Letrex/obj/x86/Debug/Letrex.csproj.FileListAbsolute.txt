@@ -8,3 +8,13 @@ C:\Users\SMESAP\Documents\GitHub\Letrex\Letrex\Letrex\obj\x86\Debug\GenerateReso
 C:\Users\SMESAP\Documents\GitHub\Letrex\Letrex\Letrex\obj\x86\Debug\Letrex.exe
 C:\Users\SMESAP\Documents\GitHub\Letrex\Letrex\Letrex\obj\x86\Debug\Letrex.pdb
 C:\Users\SMESAP\Documents\GitHub\Letrex\Letrex\Letrex\obj\x86\Debug\Letrex.FormNovoJogo.resources
+F:\Letrex\Letrex\obj\x86\Debug\Letrex.exe
+F:\Letrex\Letrex\obj\x86\Debug\Letrex.pdb
+F:\Letrex\Letrex\bin\Debug\Letrex.exe
+F:\Letrex\Letrex\bin\Debug\Letrex.pdb
+F:\Letrex\Letrex\obj\x86\Debug\ResolveAssemblyReference.cache
+F:\Letrex\Letrex\obj\x86\Debug\Letrex.FormNovoJogo.resources
+F:\Letrex\Letrex\obj\x86\Debug\Letrex.MainWindow.resources
+F:\Letrex\Letrex\obj\x86\Debug\Letrex.Properties.Resources.resources
+F:\Letrex\Letrex\obj\x86\Debug\GenerateResource.read.1.tlog
+F:\Letrex\Letrex\obj\x86\Debug\GenerateResource.write.1.tlog

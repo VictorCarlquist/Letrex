@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ArvoreTrie.cs" />
     <Compile Include="FormNovoJogo.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -60,6 +61,7 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TodasAsCombinacoes.cs" />
     <EmbeddedResource Include="FormNovoJogo.resx">
       <DependentUpon>FormNovoJogo.cs</DependentUpon>
     </EmbeddedResource>

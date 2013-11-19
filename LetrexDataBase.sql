@@ -18,32 +18,38 @@ create table verbetes (
 )
 go
 
-drop table usuarios
+select name from sys.tables
 go
 
-create table usuarios (
-	cod_usuario int primary key identity(1,1),
-	nome_usuario nvarchar(255) not null,
-	pontuacao_usuario int default 0 not null,
-	level_usuario tinyint default 0 not null
+drop table jogadores
+go
+
+create table jogadores (
+	cod_jogador int primary key identity(1,1),
+	nome_jogador nvarchar(255) not null,
+	pontuacao_jogador int default 0 not null,
+	level_jogador tinyint default 0 not null
 )
 go
 
-insert into usuarios(nome_usuario) values 
+insert into jogadores(nome_jogador) values 
 	('Guilherme'),
 	('Pedro'),
 	('Jonas')
 go
 
 
-BULK INSERT tmp_verbetes FROM 'C:\pt_BR.dic'
+BULK INSERT tmp_verbetes FROM 'f:\pt_BR.dic.dic'
 WITH
 (
       CODEPAGE = 'ACP'
 );
 
-select * from verbetes
+insert into verbetes (verbete) (select verbete from tmp_verbetes)
 go
 
-insert into verbetes (verbete) (select verbete from tmp_verbetes)
+select LEN(verbete), verbete from verbetes order by LEN(verbete)
+go
+
+select COUNT(*) from verbetes where verbete = 'xiita'
 go
