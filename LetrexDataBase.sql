@@ -7,21 +7,10 @@ go
 use LOPAII
 go
 
-create table tmp_verbetes (
-	verbete nvarchar(255) not null
-)
-go
-
 create table verbetes (
 	cod_verbete int primary key identity(1,1),
 	verbete nvarchar(255) not null
 )
-go
-
-select name from sys.tables
-go
-
-drop table jogadores
 go
 
 create table jogadores (
@@ -45,11 +34,13 @@ WITH
       CODEPAGE = 'ACP'
 );
 
-insert into verbetes (verbete) (select verbete from tmp_verbetes)
+select * from verbetes
 go
 
-select LEN(verbete), verbete from verbetes order by LEN(verbete)
+begin transaction 
+	delete from verbetes where LEN(verbete) > 9;
+commit
 go
 
-select COUNT(*) from verbetes where verbete = 'xiita'
+select COUNT(*) from verbetes
 go

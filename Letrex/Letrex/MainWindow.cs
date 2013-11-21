@@ -44,8 +44,11 @@ namespace Letrex
         // Tempo restante, por padrão, no Level 1, o tempo é 60 segundos,
         private int tempoRestante = 60;
 
-        // Lista de todas as palavras já construídas durante o Level
+        // Lista de todas as palavras já construídas durante o level
         private List<string> palavrasMontadas = new List<string>();
+
+        // Lista de todas as palavras válidas durante o level
+        private List<string> palavrasValidas = new List<string>();
 
         // Árvore para a pesquisa das palavras possíveis
         private ArvoreTrie arvoreTrie = new ArvoreTrie();
@@ -61,6 +64,29 @@ namespace Letrex
         {
             InitializeComponent();
             PopulaArvoreTrie();
+
+            this.tabelaBotaoLetras.Size = new System.Drawing.Size(500, 55);
+            this.tabelaBotaoLetras.Location = new System.Drawing.Point(12, 16);
+            this.tabelaBotaoLetras.AutoSize = true;
+            this.tabelaBotaoLetras.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+
+            this.tabelaBotaoPalavraMontada.Size = new System.Drawing.Size(500, 55);
+            this.tabelaBotaoPalavraMontada.Location = new System.Drawing.Point(12, 16);
+            this.tabelaBotaoPalavraMontada.AutoSize = true;
+            this.tabelaBotaoPalavraMontada.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+
+            this.gbxPalavraSorteada.Controls.Add(this.tabelaBotaoLetras);
+            this.gbxPalavraMontada.Controls.Add(this.tabelaBotaoPalavraMontada);
+        }
+
+        private void MainWindow_Load(object sender, EventArgs e)
+        {
+            PegaVerbetes();
+        }
+
+        private void MainWindow_Closed(object sender, FormClosedEventArgs e)
+        {
+            ArmazenaPontuacao();
         }
 
         /**
@@ -84,7 +110,7 @@ namespace Letrex
         /**
          * AcaoComecarNovoJogo()
          * 
-         * Inicia uma nova partida quando essa ação é selecionada no menu Arquivo 
+         * Inicia uma nova partida. Quando essa ação é selecionada no menu Arquivo 
          * ou através do atalho 'Ctrl+N'
          * Abre um formulário para cadastrar um novo jogador, 
          * caso nenhum nome seja informado, as informações da partida não serão salvas.
@@ -101,65 +127,41 @@ namespace Letrex
             this.pontuacaoJogador = int.Parse(novoJogoForm.PontuacaoJogador);
             this.lblNumPontos.Text = this.pontuacaoJogador.ToString();
 
-            this.tabelaBotaoLetras.Controls.Clear();
-            this.tabelaBotaoPalavraMontada.Controls.Clear();
-
-            ConfiguraRodada();
+            ConfiguraLevel();
         }
 
         /**
-         * ConfiguraRodada()
+         * ConfiguraLevel()
          * 
          * Configura a TabelaDeLetras, TabelaDeConstrucao e calcula todas as cobinações
          * possíveis
          */
-        private void ConfiguraRodada()
+        private void ConfiguraLevel()
         {
+            this.tabelaBotaoLetras.Controls.Clear();
+            this.tabelaBotaoPalavraMontada.Controls.Clear();
+
             string palavraSorteada = SorteiaPalavra();
 
             // Cria os botões
             foreach (char c in palavraSorteada)
                 tabelaBotaoLetras.Controls.Add(GeraBotao(c));
 
-            HabilitaBotaoVerificar();
-
-            // GAMBIARRA TOTAL! TEMOS QUE RESOLVER O PROBLEMA DE LENTIDÃO E CONSUMO
-            // EXAGERADO DE MEMÓRIA QUANDO A PALAVRA É MUITO GRANDE.
-            // A POLÍTICA AQUI É: CASO A PALAVRA TENHA MAIS DE 8 CARACTERES, CALCULAR 
-            // SOMENTE AS COMBINAÇÕES POSSÍVEIS PARA OS PRIMEIROS 8 CARACTERES
-            // ======= ESSE NÚMERO PODERIA VARIAR DE ACORDO COM O LEVEL! =======
-            string gambiarra;
-            if (palavraSorteada.Length > 8)
-                gambiarra = palavraSorteada.Substring(0, 8);
-            else
-                gambiarra = palavraSorteada;
-
-            TodasAsCombinacoes tc = new TodasAsCombinacoes(gambiarra);
-
-            int palavrasPossiveis = 0;
+            // Gera todas as combinações, checa as palavras que existem e as armazena 
+            // na lista de palavras válidas.
+            TodasAsCombinacoes tc = new TodasAsCombinacoes(palavraSorteada);
             foreach (string s in tc.todasCombinacoes)
                 if (arvoreTrie.Contem(s))
-                    palavrasPossiveis++; // Aqui estou armazenando apenas a quantidade.
+                    this.palavrasValidas.Add(s);
 
-            setupControls(palavraSorteada.Length, palavrasPossiveis);
+            setupControls(palavraSorteada.Length, this.palavrasValidas.Count);
         }
 
         private void setupControls(int tamPalavraSorteada, int qtdPalavrasPossiveis)
         {
-
-            this.tabelaBotaoLetras.Size = new System.Drawing.Size(500, 55);
-            this.tabelaBotaoLetras.Location = new System.Drawing.Point(12, 16);
-            this.tabelaBotaoLetras.AutoSize = true;
-            this.tabelaBotaoLetras.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            // 
             this.tabelaBotaoLetras.ColumnCount = tamPalavraSorteada;
-            this.gbxPalavraSorteada.Controls.Add(tabelaBotaoLetras);
-
-            this.tabelaBotaoPalavraMontada.Size = new System.Drawing.Size(500, 55);
-            this.tabelaBotaoPalavraMontada.Location = new System.Drawing.Point(12, 16);
-            this.tabelaBotaoPalavraMontada.AutoSize = true;
-            this.tabelaBotaoPalavraMontada.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             this.tabelaBotaoPalavraMontada.ColumnCount = tamPalavraSorteada;
-            this.gbxPalavraMontada.Controls.Add(tabelaBotaoPalavraMontada);
 
             // Temporizador
             this.Temporizador.Enabled = true;
@@ -167,22 +169,20 @@ namespace Letrex
             this.lblNumTempo.ForeColor = Color.Red;
             this.lblNumTempo.Text = this.tempoRestante.ToString();
 
-            // GroupBox
+            // Habilitando controles
             this.gbxPalavraMontada.Enabled = true;
             this.gbxPalavraSorteada.Enabled = true;
-
-            btnDesistir.Enabled = true;
-
-            // TableLayoutPanel
             this.tlpInformacoes.Enabled = true;
+            this.btnDesistir.Enabled = true;
 
             // Avança um level
             this.lblNumLevel.Text = this.levelJogador++.ToString();
 
-            // Limpa a lista com palavras montadas
             this.palavrasMontadas.Clear();
             this.lblNumCombinacoesEncontradas.Text = this.palavrasMontadas.Count.ToString();
             this.lblNumCombinacoesPossiveis.Text = qtdPalavrasPossiveis.ToString();
+
+            HabilitaBotaoVerificar();
         }
 
         /**
@@ -195,7 +195,7 @@ namespace Letrex
         {
             Random rand = new Random();
             DataTable dt = dataSet.Tables["Verbetes"];
-            DataRow[] result = dt.Select("cod_verbete=" + rand.Next(1, 312210).ToString());
+            DataRow[] result = dt.Select("cod_verbete=" + rand.Next(1, 135888).ToString());
             return result[0]["Verbete"].ToString();
         }
 
@@ -273,30 +273,30 @@ namespace Letrex
             string palavra = PegaPalavraMontada();
 
             // Se a palavra não existir, subtrai um ponto do jogador.
-            if (!arvoreTrie.Contem(palavra))
+            if (!this.palavrasValidas.Contains(palavra))
                 this.pontuacaoJogador -= 1;
 
-            // Se a palavra ainda não tiver sido montada, 
-            // soma 10 pontos ao jogador.
+            // Se a palavra já tiver sido montada, 
+            // subtrai 10 pontos do jogador.
             if (!palavrasMontadas.Contains(palavra))
+                this.pontuacaoJogador -= 10;
+              
+            // Se a palavra montada for válida, 
+            // soma 10 pontos à pontuação do jogador.
+            if (this.palavrasValidas.Contains(palavra))
             {
                 this.pontuacaoJogador += 10;
                 this.tempoRestante = 60;
                 palavrasMontadas.Add(palavra);
                 this.lblNumCombinacoesEncontradas.Text = this.palavrasMontadas.Count.ToString();
             }
-            else // Caso contrário, subtrai 10 pontos.
-                this.pontuacaoJogador -= 10;
 
             // Atualiza o label que informa a pontuação.
             this.lblNumPontos.Text = this.pontuacaoJogador.ToString();
 
             // Verifica se deve mudar de Level.
             if (this.lblNumCombinacoesEncontradas.Text == this.lblNumCombinacoesPossiveis.Text)
-            {
-                
-                ConfiguraRodada();
-            }
+                ConfiguraLevel();
         }
 
 
@@ -319,34 +319,32 @@ namespace Letrex
             tempoRestante--;
             lblNumTempo.Text = tempoRestante.ToString() + " Segundos";
 
-            FinalizaJogo();
+            // Tempo esgotado, finaliza jogo.
+            if (this.tempoRestante == 0)
+                FinalizaJogo();
         }
 
         /**
          * FinalizaJogo()
          * 
-         * Caso o tempo se esgote, finaliza o jogo.
          */
         private void FinalizaJogo()
         {
-            if (this.tempoRestante == 0)
-            {
-                lblNumTempo.Text = "Tempo esgotado!";
+            lblNumTempo.Text = "Tempo esgotado!";
 
-                this.tempoRestante = 60;
+            this.tempoRestante = 60;
                 
-                this.Temporizador.Enabled = false;
-                this.btnVerificar.Enabled = false;
-                this.palavrasMontadas.Clear();
+            this.Temporizador.Enabled = false;
+            this.btnVerificar.Enabled = false;
+            this.palavrasMontadas.Clear();
 
-                gbxPalavraMontada.Enabled = false;
-                gbxPalavraSorteada.Enabled = false;
+            gbxPalavraMontada.Enabled = false;
+            gbxPalavraSorteada.Enabled = false;
 
-                tlpInformacoes.Enabled = false;
-                btnDesistir.Enabled = false;
+            tlpInformacoes.Enabled = false;
+            btnDesistir.Enabled = false;
 
-                ArmazenaPontuacao();
-            }
+            ArmazenaPontuacao();
         }
 
         /*
@@ -393,7 +391,7 @@ namespace Letrex
                     SqlCommand comando = new SqlCommand("SELECT verbete FROM verbetes", Conexao);
                     SqlDataReader dr = comando.ExecuteReader();
                     while (dr.Read())
-                        arvoreTrie.Inserir(dr[0].ToString());
+                        arvoreTrie.Inserir(dr["verbete"].ToString());
                 }
                 catch (Exception erro)
                 {
@@ -426,7 +424,7 @@ namespace Letrex
          */
         private void BotaoDesistirClicado(object sender, EventArgs e)
         {
-            ArmazenaPontuacao();
+            FinalizaJogo();
         }
 
         /**
@@ -436,16 +434,6 @@ namespace Letrex
         private void MudaLevel()
         {
 
-        }
-
-        private void MainWindow_Load(object sender, EventArgs e)
-        {
-            PegaVerbetes();
-        }
-
-        private void MainWindow_Closed(object sender, FormClosedEventArgs e)
-        {
-            this.ArmazenaPontuacao();
         }
     }
 }
